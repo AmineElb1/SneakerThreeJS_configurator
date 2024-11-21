@@ -32,5 +32,38 @@ body {
   border-radius: 50%;
   cursor: pointer;
   border: black 1px solid;
+}
+
+.color:hover {
+  border: white 1px solid;
+}
+
+.color:focus {
+  border: white 2px solid;
+}
+
+
+@media (max-width: 600px) {
+  #config-panel {
+    width: 60%;
+    height: 210px;
+    top: 10px;
+    left: 10px;
+  }
+
+  #config-panel h3 {
+    font-size: 0.8rem;
+    margin: 5px;
+  }
+
+  #config-panel input[type="range"] {
+    width: 90%;
+  }
+
+  .color{
+    width: 20px;
+    height: 20px;
+    margin: 5px;
+  }
 
 }
