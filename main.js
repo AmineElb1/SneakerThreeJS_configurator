@@ -37,23 +37,52 @@ const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three/examples/jsm/libs/draco/'); // Externe Draco-decoder
 loader.setDRACOLoader(dracoLoader);
 
-let model;
+let model; // Globale variabele voor het model
+
 loader.load(
   '/Shoe_compressed.glb', // Zorg ervoor dat dit je eigen modelbestand is
   (gltf) => {
     model = gltf.scene;
     model.scale.set(15, 15, 15);
+
     model.traverse((child) => {
       if (child.isMesh) {
+        console.log('Mesh gevonden:', child.name); // Naam van de mesh loggen
         child.material.envMapIntensity = 1; // Verhoog reflectie-intensiteit
         child.material.needsUpdate = true;
       }
     });
+
     scene.add(model);
   },
   undefined,
   (error) => console.error(error)
 );
+
+// Functies voor kleurverandering
+function changeShoeColor(color) {
+  if (!model) return;
+
+  model.traverse((child) => {
+    if (child.isMesh && child.name === 'outside_1') { // Vervang 'Shoe' door de naam van jouw mesh
+      child.material.color.set(color);
+    }
+  });
+}
+
+function changeLaceColor(color) {
+  if (!model) return;
+
+  model.traverse((child) => {
+    if (child.isMesh && child.name === 'laces') { // Vervang 'Laces' door de naam van jouw mesh
+      child.material.color.set(color);
+    }
+  });
+}
+
+// Eventlisteners voor buttons
+window.changeShoeColor = changeShoeColor;
+window.changeLaceColor = changeLaceColor;
 
 // Orbit Controls
 const controls = new OrbitControls(camera, renderer.domElement);
