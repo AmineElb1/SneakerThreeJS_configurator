@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { GUI } from 'dat.gui';
 import './style.css';
@@ -13,19 +14,13 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true; // Schaduwen inschakelen
 document.body.appendChild(renderer.domElement);
 
-// Environment Map
-const cubeTextureLoader = new THREE.CubeTextureLoader();
-const environmentMap = cubeTextureLoader.load([
-  '/px.jpg', // Positieve X-richting
-  '/nx.jpg', // Negatieve X-richting
-  '/py.jpg', // Positieve Y-richting
-  '/ny.jpg', // Negatieve Y-richting
-  '/pz.jpg', // Positieve Z-richting
-  '/nz.jpg', // Negatieve Z-richting
-]);
-
-scene.background = environmentMap; // Voeg de environment map toe als achtergrond
-scene.environment = environmentMap; // Gebruik de map voor reflecties/verlichting
+// EXR Environment Map
+const exrLoader = new EXRLoader();
+exrLoader.load('/textures/studio_small_09_4K.exr', (texture) => {
+  texture.mapping = THREE.EquirectangularReflectionMapping; // Gebruik reflectiemapping
+  scene.environment = texture; // Reflecties op objecten
+  scene.background = texture;  // HDRI als achtergrond
+});
 
 // Verlichting
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Omgevingslicht
@@ -50,8 +45,8 @@ loader.load(
     model.scale.set(15, 15, 15);
     model.traverse((child) => {
       if (child.isMesh) {
-        child.material.envMap = environmentMap; // Voeg de environment map toe aan het materiaal
-        child.material.needsUpdate = true; // Zorg ervoor dat het materiaal wordt bijgewerkt
+        child.material.envMapIntensity = 1; // Verhoog reflectie-intensiteit
+        child.material.needsUpdate = true;
       }
     });
     scene.add(model);
@@ -88,9 +83,6 @@ gui.add(settings, 'lightPositionZ', -10, 10).onChange((value) => {
 
 // Camera positie
 camera.position.set(0, 2, 8);
-
-// Background (voor testing)
-scene.background = new THREE.Color('White');
 
 // Animatie
 function animate() {
