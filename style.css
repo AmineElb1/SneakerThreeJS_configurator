@@ -1,0 +1,36 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+#config-panel {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+#config-panel h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+#config-panel input[type="range"] {
+  width: 100%;
+} 
+
+
+.color{
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin: 15px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: black 1px solid;
+
+}
