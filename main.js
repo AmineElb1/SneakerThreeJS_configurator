@@ -64,7 +64,7 @@ function changeShoeColor(color) {
   if (!model) return;
 
   model.traverse((child) => {
-    if (child.isMesh && child.name === 'outside_1') { // Vervang 'Shoe' door de naam van jouw mesh
+    if (child.isMesh && child.name === 'outside_1' || child.isMesh && child.name === 'outside_2' || child.isMesh && child.name === 'outside_3') { // Vervang 'Shoe' door de naam van jouw mesh
       child.material.color.set(color);
     }
   });
@@ -80,9 +80,20 @@ function changeLaceColor(color) {
   });
 }
 
+function changeSoleColor(color) {
+  if (!model) return;
+
+  model.traverse((child) => {
+    if (child.isMesh && child.name === 'sole_bottom') { // Vervang 'Sole' door de naam van jouw mesh
+      child.material.color.set(color);
+    }
+  });
+}
+
 // Eventlisteners voor buttons
 window.changeShoeColor = changeShoeColor;
 window.changeLaceColor = changeLaceColor;
+window.changeSoleColor = changeSoleColor;
 
 // Orbit Controls
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -112,6 +123,13 @@ gui.add(settings, 'lightPositionZ', -10, 10).onChange((value) => {
 
 // Camera positie
 camera.position.set(0, 2, 8);
+
+//responsive
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
 
 // Animatie
 function animate() {
