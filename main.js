@@ -1,70 +1,81 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
-import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { GUI } from 'dat.gui';
-import './style.css';
 
-// Scene, Camera, Renderer
+// Setup Scene, Camera, Renderer
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true; // Schaduwen inschakelen
-document.body.appendChild(renderer.domElement);
+renderer.shadowMap.enabled = true;
+document.getElementById('viewer').appendChild(renderer.domElement);
 
-// EXR Environment Map
-const exrLoader = new EXRLoader();
-exrLoader.load('/textures/studio_small_09_4K.exr', (texture) => {
-  texture.mapping = THREE.EquirectangularReflectionMapping; // Gebruik reflectiemapping
-  scene.environment = texture; // Reflecties op objecten
-  scene.background = texture;  // HDRI als achtergrond
-});
+let model;
+const colors = ['white', 'black', 'blue', 'red'];
 
-// Verlichting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Omgevingslicht
+// Loading Screen
+const loadingScreen = document.getElementById('loading-screen');
+
+// Load Environment Map
+const environmentMap = new THREE.TextureLoader().load('/textures/studio_small.jpg');
+scene.environment = environmentMap;
+
+// Lights
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(5, 10, 7);
-directionalLight.castShadow = true;
 scene.add(directionalLight);
 
-// GLTF Model Loader met DRACO Loader
+// Load 3D Model
 const loader = new GLTFLoader();
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three/examples/jsm/libs/draco/'); // Externe Draco-decoder
+dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three/examples/jsm/libs/draco/');
 loader.setDRACOLoader(dracoLoader);
 
-let model; // Globale variabele voor het model
-
 loader.load(
-  '/Shoe_compressed.glb', // Zorg ervoor dat dit je eigen modelbestand is
+  '/Shoe_compressed.glb',
   (gltf) => {
+    if (loadingScreen) loadingScreen.style.display = 'none';
     model = gltf.scene;
-    model.scale.set(15, 15, 15);
+    model.scale.set(20, 20, 20);
 
     model.traverse((child) => {
       if (child.isMesh) {
-        console.log('Mesh gevonden:', child.name); // Naam van de mesh loggen
-        child.material.envMapIntensity = 1; // Verhoog reflectie-intensiteit
-        child.material.needsUpdate = true;
+        child.material.envMapIntensity = 1;
       }
     });
 
     scene.add(model);
   },
   undefined,
-  (error) => console.error(error)
+  (error) => console.error('Error loading model:', error)
 );
 
-// Functies voor kleurverandering
+// Add Color Buttons
+function createColorButtons(containerId, changeFunction) {
+  const container = document.getElementById(containerId);
+  if (!container) {
+    console.error(`Container with ID "${containerId}" not found.`);
+    return;
+  }
+
+  colors.forEach((color) => {
+    const button = document.createElement('button');
+    button.className = 'color';
+    button.style.backgroundColor = color;
+    button.onclick = () => changeFunction(color);
+    container.appendChild(button);
+  });
+}
+
+// Change Colors
 function changeShoeColor(color) {
   if (!model) return;
-
   model.traverse((child) => {
-    if (child.isMesh && child.name === 'outside_1' || child.isMesh && child.name === 'outside_2' || child.isMesh && child.name === 'outside_3') { // Vervang 'Shoe' door de naam van jouw mesh
+    if (child.isMesh && child.name.includes('outside')) {
       child.material.color.set(color);
     }
   });
@@ -72,9 +83,8 @@ function changeShoeColor(color) {
 
 function changeLaceColor(color) {
   if (!model) return;
-
   model.traverse((child) => {
-    if (child.isMesh && child.name === 'laces') { // Vervang 'Laces' door de naam van jouw mesh
+    if (child.isMesh && child.name.includes('laces')) {
       child.material.color.set(color);
     }
   });
@@ -82,56 +92,62 @@ function changeLaceColor(color) {
 
 function changeSoleColor(color) {
   if (!model) return;
-
   model.traverse((child) => {
-    if (child.isMesh && child.name === 'sole_bottom') { // Vervang 'Sole' door de naam van jouw mesh
+    if (child.isMesh && child.name.includes('sole')) {
       child.material.color.set(color);
     }
   });
 }
 
-// Eventlisteners voor buttons
-window.changeShoeColor = changeShoeColor;
-window.changeLaceColor = changeLaceColor;
-window.changeSoleColor = changeSoleColor;
+// Reset Model
+function resetModel() {
+  changeShoeColor('white');
+  changeLaceColor('white');
+  changeSoleColor('white');
+}
 
-// Orbit Controls
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
+// Add Buttons to UI
+createColorButtons('shoe-colors', changeShoeColor);
+createColorButtons('lace-colors', changeLaceColor);
+createColorButtons('sole-colors', changeSoleColor);
 
-// GUI instellingen
-const gui = new GUI();
-const settings = {
-  lightIntensity: 1,
-  lightPositionX: 5,
-  lightPositionY: 10,
-  lightPositionZ: 7,
-};
+const resetButton = document.getElementById('reset-button');
+if (resetButton) {
+  resetButton.addEventListener('click', resetModel);
+} else {
+  console.error('Reset button not found.');
+}
 
-gui.add(settings, 'lightIntensity', 0, 2).onChange((value) => {
-  directionalLight.intensity = value;
-});
-gui.add(settings, 'lightPositionX', -10, 10).onChange((value) => {
-  directionalLight.position.x = value;
-});
-gui.add(settings, 'lightPositionY', 0, 20).onChange((value) => {
-  directionalLight.position.y = value;
-});
-gui.add(settings, 'lightPositionZ', -10, 10).onChange((value) => {
-  directionalLight.position.z = value;
+// Tab functionality
+const tabs = document.querySelectorAll('.tab-button');
+const contents = document.querySelectorAll('.tab-content');
+
+tabs.forEach((tab) => {
+  tab.addEventListener('click', () => {
+    tabs.forEach((t) => t.classList.remove('active'));
+    tab.classList.add('active');
+
+    contents.forEach((content) => {
+      content.classList.remove('active');
+      if (content.id === tab.dataset.tab) {
+        content.classList.add('active');
+      }
+    });
+  });
 });
 
-// Camera positie
+// Camera & Controls
 camera.position.set(0, 2, 8);
+const controls = new OrbitControls(camera, renderer.domElement);
 
-//responsive
+// Resize
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Animatie
+// Animation Loop
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
