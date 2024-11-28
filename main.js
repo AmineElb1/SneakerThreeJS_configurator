@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import gsap from 'gsap'; 
 
 // Setup Scene, Camera, Renderer
 const scene = new THREE.Scene();
@@ -12,14 +13,16 @@ renderer.shadowMap.enabled = true;
 document.getElementById('viewer').appendChild(renderer.domElement);
 
 let model;
-const colors = ['white', 'black', 'blue', 'red'];
+const colors = ['white', 'black', 'blue', 'red', 'green', 'yellow', 'purple'];
+const textures = [
+  { name: 'Leather', path: '/leather.jpg' },
+  { name: 'Fabric', path: '/texture.jpg' }
+];
 
 // Loading Screen
 const loadingScreen = document.getElementById('loading-screen');
 
-// Load Environment Map
-const environmentMap = new THREE.TextureLoader().load('/textures/studio_small.jpg');
-scene.environment = environmentMap;
+scene.background = new THREE.Color('lightgrey'); // Lichtgrijs
 
 // Lights
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -40,7 +43,7 @@ loader.load(
   (gltf) => {
     if (loadingScreen) loadingScreen.style.display = 'none';
     model = gltf.scene;
-    model.scale.set(20, 20, 20);
+    model.scale.set(15, 15, 15);
 
     model.traverse((child) => {
       if (child.isMesh) {
@@ -54,19 +57,89 @@ loader.load(
   (error) => console.error('Error loading model:', error)
 );
 
-// Add Color Buttons
-function createColorButtons(containerId, changeFunction) {
+// Raycaster setup
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let isAnimating = false;
+
+// Mouse move event (updates raycaster position)
+window.addEventListener('mousemove', (event) => {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+});
+
+// Click event with Raycasting
+window.addEventListener('click', () => {
+  if (isAnimating) return; // Prevent overlapping animations
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(scene.children, true);
+
+  if (intersects.length > 0) {
+    const firstIntersect = intersects[0];
+    if (!firstIntersect.object.material) return;
+
+    // Handle raycast interaction
+    if (firstIntersect.object.material.name === 'mat_laces') {
+      isAnimating = true;
+      highlightMaterial(firstIntersect.object.material);
+      animateCamera(0, 5, 4);
+    } else if (
+      firstIntersect.object.material.name === 'mat_sole_top' ||
+      firstIntersect.object.material.name === 'mat_sole_bottom'
+    ) {
+      isAnimating = true;
+      highlightMaterial(firstIntersect.object.material);
+      animateCamera(6, 0, 1);
+    } else if (
+      firstIntersect.object.material.name === 'mat_outside_1' ||
+      firstIntersect.object.material.name === 'mat_outside_2' ||
+      firstIntersect.object.material.name === 'mat_outside_3'
+    ) {
+      isAnimating = true;
+      highlightMaterial(firstIntersect.object.material);
+      animateCamera(-6, 0, 1);
+    }
+  }
+});
+
+// Helper functions for raycast animations
+function highlightMaterial(material) {
+  const originalEmissive = material.emissive.clone();
+  material.emissive.set(0x00ff00); // Highlight color
+  setTimeout(() => {
+    material.emissive.copy(originalEmissive); // Reset to original color
+    isAnimating = false;
+  }, 500);
+}
+
+function animateCamera(x, y, z) {
+  gsap.to(camera.position, {
+    duration: 1,
+    x,
+    y,
+    z,
+    onComplete: () => (isAnimating = false),
+  });
+}
+
+// Add Color and Texture Buttons
+function createButtons(containerId, items, changeFunction, isTexture = false) {
   const container = document.getElementById(containerId);
   if (!container) {
     console.error(`Container with ID "${containerId}" not found.`);
     return;
   }
 
-  colors.forEach((color) => {
+  items.forEach((item) => {
     const button = document.createElement('button');
-    button.className = 'color';
-    button.style.backgroundColor = color;
-    button.onclick = () => changeFunction(color);
+    button.className = isTexture ? 'texture-button' : 'color';
+    if (isTexture) {
+      button.style.backgroundImage = `url(${item.path})`;
+      button.style.backgroundSize = 'cover';
+    } else {
+      button.style.backgroundColor = item;
+    }
+    button.onclick = () => changeFunction(isTexture ? item.path : item);
     container.appendChild(button);
   });
 }
@@ -77,6 +150,8 @@ function changeShoeColor(color) {
   model.traverse((child) => {
     if (child.isMesh && child.name.includes('outside')) {
       child.material.color.set(color);
+      child.material.map = null; // Remove texture
+      child.material.needsUpdate = true;
     }
   });
 }
@@ -86,6 +161,8 @@ function changeLaceColor(color) {
   model.traverse((child) => {
     if (child.isMesh && child.name.includes('laces')) {
       child.material.color.set(color);
+      child.material.map = null;
+      child.material.needsUpdate = true;
     }
   });
 }
@@ -95,6 +172,25 @@ function changeSoleColor(color) {
   model.traverse((child) => {
     if (child.isMesh && child.name.includes('sole')) {
       child.material.color.set(color);
+      child.material.map = null;
+      child.material.needsUpdate = true;
+    }
+  });
+}
+
+// Apply Texture
+function applyTexture(texturePath) {
+  if (!model) return;
+  const texture = textureLoader.load(texturePath, () => {
+    console.log('Texture loaded:', texturePath);
+  }, undefined, (error) => {
+    console.error('Error loading texture:', error);
+  });
+  model.traverse((child) => {
+    if (child.isMesh && (child.name.includes('outside') || child.name.includes('laces') || child.name.includes('sole'))) {
+      child.material.map = texture;
+      child.material.color.set("black"); // Set to light gray to make texture more visible // Reset color to ensure texture is visible
+      child.material.needsUpdate = true;
     }
   });
 }
@@ -107,9 +203,10 @@ function resetModel() {
 }
 
 // Add Buttons to UI
-createColorButtons('shoe-colors', changeShoeColor);
-createColorButtons('lace-colors', changeLaceColor);
-createColorButtons('sole-colors', changeSoleColor);
+createButtons('shoe-colors', colors, changeShoeColor);
+createButtons('lace-colors', colors, changeLaceColor);
+createButtons('sole-colors', colors, changeSoleColor);
+createButtons('texture-options', textures, applyTexture, true);
 
 const resetButton = document.getElementById('reset-button');
 if (resetButton) {

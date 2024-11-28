@@ -19,6 +19,10 @@ body {
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #f2f2f2, #e0e0e0); /* Subtiele grijs gradient */
+  position: relative;
 }
 
 /* Canvas in de viewer */
@@ -30,7 +34,8 @@ body {
 /* Configurator rechts */
 #configurator {
   flex: 1;
-  background: #ffffff;
+  background: #1c1c1c;
+  color: white;
   display: flex;
   flex-direction: column;
   padding: 20px;
@@ -47,6 +52,7 @@ body {
 }
 
 .tab-button {
+  color: white;
   flex: 1;
   padding: 10px;
   text-align: center;
@@ -111,3 +117,26 @@ body {
 #reset-button:hover {
   background: #0056b3;
 }
+
+/* Upload knop */
+#upload-logo {
+  margin: 15px 0;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+
+.texture-button {
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.texture-button:hover {
+  transform: scale(1.1);
+  border-color: #007bff;
+}
+

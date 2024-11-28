@@ -17,6 +17,9 @@
         <button class="tab-button active" data-tab="shoe">Schoenen</button>
         <button class="tab-button" data-tab="laces">Veters</button>
         <button class="tab-button" data-tab="sole">Zolen</button>
+        <button class="tab-button" data-tab="textures">Texturen</button>
+
+
       </div>
   
       <div class="tab-content active" id="shoe">
@@ -31,12 +34,17 @@
         <h3>Zolen</h3>
         <div class="color-options" id="sole-colors"></div>
       </div>
+
+      <div class="tab-content" id="textures">
+        <h3>Texturen</h3>
+        <div id="texture-options"></div>
+      </div>
   
+      <input type="file" id="upload-logo" accept="image/*" />
       <button id="reset-button">Reset</button>
     </div>
   </div>
   
-
   <script type="module" src="main.js"></script>
 </body>
 </html>
