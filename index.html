@@ -13,35 +13,105 @@
   
     <!-- Configurator Panel -->
     <div id="configurator">
-      <div class="tabs">
-        <button class="tab-button active" data-tab="shoe">Schoenen</button>
-        <button class="tab-button" data-tab="laces">Veters</button>
-        <button class="tab-button" data-tab="sole">Zolen</button>
-        <button class="tab-button" data-tab="textures">Texturen</button>
+      <div class="section">
+        <button class="section-header" data-section="shoe">
+          Main Color
+          <div class="current-color-container">
+            <div class="current-color" id="current-shoe-color"></div>
+          </div>
+        </button>
+        <div class="section-content" id="shoe">
+          <div class="color-options" id="shoe-colors"></div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <button class="section-header" data-section="laces">
+          Laces Color
+          <div class="current-color-container">
+            <div class="current-color" id="current-lace-color"></div>
+          </div>
+        </button>
+        <div class="section-content" id="laces">
+          <div class="color-options" id="lace-colors"></div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <button class="section-header" data-section="sole">
+          Sole Color
+          <div class="current-color-container">
+            <div class="current-color" id="current-sole-color"></div>
+          </div>
+        </button>
+        <div class="section-content" id="sole">
+          <div class="color-options" id="sole-colors"></div>
+        </div>
+      </div>
+      
+      <div class="section">
+        <button class="section-header" data-section="texture">
+          Texture
+          <div class="current-texture-container">
+            <div class="current-texture" id="current-texture-display"></div>
+          </div>
+        </button>
+        <div class="section-content" id="texture">
+          <div class="texture-options" id="texture-options"></div>
+        </div>
+      </div>
 
-
-      </div>
-  
-      <div class="tab-content active" id="shoe">
-        <h3>Schoenen</h3>
-        <div class="color-options" id="shoe-colors"></div>
-      </div>
-      <div class="tab-content" id="laces">
-        <h3>Veters</h3>
-        <div class="color-options" id="lace-colors"></div>
-      </div>
-      <div class="tab-content" id="sole">
-        <h3>Zolen</h3>
-        <div class="color-options" id="sole-colors"></div>
-      </div>
-
-      <div class="tab-content" id="textures">
-        <h3>Texturen</h3>
-        <div id="texture-options"></div>
-      </div>
-  
-      <input type="file" id="upload-logo" accept="image/*" />
       <button id="reset-button">Reset</button>
+
+      
+      <button id="order-button">Order</button>
+
+      <div id="order-modal" class="modal hidden">
+  <div class="modal-content">
+    <h2>Plaats je bestelling</h2>
+    <form id="order-form">
+      <div class="form-group">
+        <label for="name">Naam:</label>
+        <input type="text" id="name" name="name" placeholder="Jouw naam" required />
+      </div>
+
+      <div class="form-group">
+        <label for="email">E-mailadres:</label>
+        <input type="email" id="email" name="email" placeholder="Jouw e-mailadres" required />
+      </div>
+
+      <div class="form-group">
+        <label for="address">Adres:</label>
+        <input type="text" id="address" name="address" placeholder="Jouw adres" required />
+      </div>
+
+      <div class="form-group">
+        <label for="size">Maat:</label>
+        <select id="size" name="size" required>
+          <option value="" disabled selected>Kies een maat</option>
+          <option value="36">36</option>
+          <option value="37">37</option>
+          <option value="38">38</option>
+          <option value="39">39</option>
+          <option value="40">40</option>
+          <option value="41">41</option>
+          <option value="42">42</option>
+          <option value="43">43</option>
+          <option value="44">44</option>
+        </select>
+      </div>
+
+      <button type="submit" class="submit-button">Bestellen</button>
+    </form>
+    <button id="close-modal" class="close-button">Sluiten</button>
+  </div>
+</div>
+
+
+    
+      <div id="logo-container">
+        <img id="logo" src="/public/swearLogo.png" alt="Logo" />
+      </div>
     </div>
   </div>
   

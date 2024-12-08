@@ -1,6 +1,7 @@
 body {
   margin: 0;
   padding: 0;
+  font-family: Arial, sans-serif;
 }
 
 /* Hoofdcontainer voor layout */
@@ -34,8 +35,8 @@ body {
 /* Configurator rechts */
 #configurator {
   flex: 1;
-  background: #1c1c1c;
-  color: white;
+  background: #ffffff;
+  color: #333;
   display: flex;
   flex-direction: column;
   padding: 20px;
@@ -43,61 +44,81 @@ body {
   overflow-y: auto;
 }
 
-/* Tabs bovenaan */
-.tabs {
+/* Sectie voor accordeon stijl */
+.section {
+  margin-bottom: 15px;
+}
+
+.section-header {
+  background: #222222;
+  color: #fff;
   display: flex;
-  justify-content: space-around;
-  border-bottom: 2px solid #ddd;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  border-radius: 4px;
+  width: 100%;
+  height: 5rem;
+  padding: 0 15px;
 }
 
-.tab-button {
-  color: white;
-  flex: 1;
-  padding: 10px;
-  text-align: center;
-  background: none;
-  border: none;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.section-header:hover {
+  background: rgb(39, 255, 39);
 }
 
-.tab-button.active {
-  border-bottom: 3px solid #007bff;
-  font-weight: bold;
-}
-
-.tab-content {
+.section-content {
   display: none;
   flex-direction: column;
+  padding: 15px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 0 0 4px 4px;
+  
 }
 
-.tab-content.active {
+#texture{
+  width: 100%;
+}
+.section-content.active {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 
-/* Kleuropties */
-.color-options {
+/* Kleuropties en Textuuropties */
+.color-options, .texture-options {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  margin-top: 10px;
 }
 
-.color {
+.color, .texture-button {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 4px;
   border: 2px solid #ddd;
   cursor: pointer;
   transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.color:hover {
+.color:hover, .texture-button:hover {
   transform: scale(1.2);
   border-color: #007bff;
+}
+
+/* Weergave huidige kleur */
+.current-color-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.current-color {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  margin-right: 10px;
+  background-color: #fff; /* Standaard wit als startkleur */
 }
 
 /* Reset Button */
@@ -106,7 +127,7 @@ body {
   padding: 10px 15px;
   width: 100%;
   border: none;
-  background: #007bff;
+  background: #222222;
   color: white;
   font-size: 1rem;
   cursor: pointer;
@@ -114,29 +135,63 @@ body {
   transition: background 0.3s ease;
 }
 
-#reset-button:hover {
-  background: #0056b3;
-}
-
-/* Upload knop */
-#upload-logo {
-  margin: 15px 0;
-  padding: 10px;
-  border-radius: 5px;
-  font-size: 1rem;
+#order-button {
+  margin-top: 20px;
+  padding: 10px 15px;
+  width: 100%;
   border: none;
+  background: rgb(39, 255, 39);
+  color: white;
+  font-size: 1rem;
   cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+#order-button:hover {
+  background: #128800;
+  box-shadow: #222222 0px 0px 10px;
 }
 
 
-.texture-button {
-  cursor: pointer;
-  border: 2px solid transparent;
-  transition: transform 0.3s ease, border-color 0.3s ease;
+#reset-button:hover {
+  background: rgb(39, 255, 39);
 }
 
-.texture-button:hover {
-  transform: scale(1.1);
-  border-color: #007bff;
+/* File Input Styling */
+#upload-logo {
+  margin-top: 15px;
 }
+
+#logo-container {
+  margin-top: 15px;
+  text-align: center;
+}
+
+#logo {
+  max-width: 100px;
+  height: auto;
+}
+
+
+#texture-container {
+  margin-top: 15px;
+  text-align: center;
+}
+
+#texture {
+  max-width: 100px;
+  height: auto;
+}
+
+/* Accordeon pijl */
+.arrow {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+.arrow.active {
+  transform: rotate(180deg);
+}
+
 

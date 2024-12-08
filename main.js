@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import gsap from 'gsap'; 
+import gsap from 'gsap';
 
 // Setup Scene, Camera, Renderer
 const scene = new THREE.Scene();
@@ -12,17 +12,22 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.getElementById('viewer').appendChild(renderer.domElement);
 
+renderer.setPixelRatio(window.devicePixelRatio);
+
 let model;
 const colors = ['white', 'black', 'blue', 'red', 'green', 'yellow', 'purple'];
-const textures = [
-  { name: 'Leather', path: '/leather.jpg' },
-  { name: 'Fabric', path: '/texture.jpg' }
-];
+const textureLoader = new THREE.TextureLoader();
+const textures = {
+  leather: {
+    albedo: textureLoader.load('/public/textures/leatherTexture.jpg'),
+  },
+  vinyl: {
+    albedo: textureLoader.load('/public/textures/vinyl.jpg'),
+  },
+};
 
-// Loading Screen
-const loadingScreen = document.getElementById('loading-screen');
-
-scene.background = new THREE.Color('lightgrey'); // Lichtgrijs
+// Scene Background
+scene.background = new THREE.Color('lightgrey');
 
 // Lights
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -41,7 +46,6 @@ loader.setDRACOLoader(dracoLoader);
 loader.load(
   '/Shoe_compressed.glb',
   (gltf) => {
-    if (loadingScreen) loadingScreen.style.display = 'none';
     model = gltf.scene;
     model.scale.set(15, 15, 15);
 
@@ -52,6 +56,7 @@ loader.load(
     });
 
     scene.add(model);
+    console.log('Model loaded successfully.');
   },
   undefined,
   (error) => console.error('Error loading model:', error)
@@ -62,7 +67,6 @@ const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let isAnimating = false;
 
-// Mouse move event (updates raycaster position)
 window.addEventListener('mousemove', (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -70,7 +74,7 @@ window.addEventListener('mousemove', (event) => {
 
 // Click event with Raycasting
 window.addEventListener('click', () => {
-  if (isAnimating) return; // Prevent overlapping animations
+  if (isAnimating) return;
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObjects(scene.children, true);
 
@@ -78,51 +82,114 @@ window.addEventListener('click', () => {
     const firstIntersect = intersects[0];
     if (!firstIntersect.object.material) return;
 
-    // Handle raycast interaction
     if (firstIntersect.object.material.name === 'mat_laces') {
-      isAnimating = true;
       highlightMaterial(firstIntersect.object.material);
-      animateCamera(0, 5, 4);
-    } else if (
-      firstIntersect.object.material.name === 'mat_sole_top' ||
-      firstIntersect.object.material.name === 'mat_sole_bottom'
-    ) {
-      isAnimating = true;
-      highlightMaterial(firstIntersect.object.material);
-      animateCamera(6, 0, 1);
-    } else if (
-      firstIntersect.object.material.name === 'mat_outside_1' ||
-      firstIntersect.object.material.name === 'mat_outside_2' ||
-      firstIntersect.object.material.name === 'mat_outside_3'
-    ) {
-      isAnimating = true;
-      highlightMaterial(firstIntersect.object.material);
-      animateCamera(-6, 0, 1);
     }
   }
 });
 
-// Helper functions for raycast animations
 function highlightMaterial(material) {
   const originalEmissive = material.emissive.clone();
-  material.emissive.set(0x00ff00); // Highlight color
+  material.emissive.set(0x00ff00);
   setTimeout(() => {
-    material.emissive.copy(originalEmissive); // Reset to original color
+    material.emissive.copy(originalEmissive);
     isAnimating = false;
   }, 500);
 }
 
-function animateCamera(x, y, z) {
-  gsap.to(camera.position, {
-    duration: 1,
-    x,
-    y,
-    z,
-    onComplete: () => (isAnimating = false),
+// Accordion functionality for sections
+function setupAccordion() {
+  const sections = document.querySelectorAll('.section-header');
+  const sectionContents = document.querySelectorAll('.section-content');
+
+  sections.forEach((section) => {
+    section.addEventListener('click', () => {
+      const contentId = section.dataset.section;
+      const content = document.getElementById(contentId);
+
+      if (!content) {
+        console.error(`No content found for section: ${contentId}`);
+        return;
+      }
+
+      const isOpen = content.classList.contains('active');
+
+      sectionContents.forEach((c) => c.classList.remove('active'));
+      sections.forEach((s) => s.classList.remove('active'));
+
+      if (!isOpen) {
+        content.classList.add('active');
+        section.classList.add('active');
+      }
+      console.log(`Clicked section: ${section.dataset.section}`);
+    });
   });
 }
 
-// Add Color and Texture Buttons
+// Initialize accordion
+setupAccordion();
+
+// Change Colors
+function changeShoeColor(color) {
+  if (!model) return;
+  model.traverse((child) => {
+    if (child.isMesh && child.name.includes('outside')) {
+      child.material.color.set(color);
+      child.material.map = null;
+      child.material.needsUpdate = true;
+    }
+  });
+
+  const currentShoeColorElement = document.getElementById('current-shoe-color');
+  if (currentShoeColorElement) {
+    currentShoeColorElement.style.backgroundColor = color;
+    console.log(`Current shoe color updated to: ${color}`);
+  }
+}
+
+function changeLaceColor(color) {
+  if (!model) return;
+  model.traverse((child) => {
+    if (child.isMesh && child.name.includes('laces')) {
+      child.material.color.set(color);
+      child.material.needsUpdate = true;
+    }
+  });
+
+  const currentLaceColorElement = document.getElementById('current-lace-color');
+  if (currentLaceColorElement) {
+    currentLaceColorElement.style.backgroundColor = color;
+    console.log(`Current lace color updated to: ${color}`);
+  }
+}
+
+function changeSoleColor(color) {
+  if (!model) return;
+  model.traverse((child) => {
+    if (child.isMesh && child.name.includes('sole')) {
+      child.material.color.set(color);
+      child.material.needsUpdate = true;
+    }
+  });
+
+  const currentSoleColorElement = document.getElementById('current-sole-color');
+  if (currentSoleColorElement) {
+    currentSoleColorElement.style.backgroundColor = color;
+    console.log(`Current sole color updated to: ${color}`);
+  }
+}
+
+function changeTexture(texture) {
+  if (!model) return;
+  model.traverse((child) => {
+    if (child.isMesh && child.name.includes('outside')) {
+      child.material.map = texture.albedo || null;
+      child.material.needsUpdate = true;
+    }
+  });
+}
+
+// Add Buttons to UI
 function createButtons(containerId, items, changeFunction, isTexture = false) {
   const container = document.getElementById(containerId);
   if (!container) {
@@ -133,80 +200,61 @@ function createButtons(containerId, items, changeFunction, isTexture = false) {
   items.forEach((item) => {
     const button = document.createElement('button');
     button.className = isTexture ? 'texture-button' : 'color';
+
     if (isTexture) {
-      button.style.backgroundImage = `url(${item.path})`;
+      if (item.albedo?.image) {
+        button.style.backgroundImage = `url(${item.albedo.src})`;
+      } else {
+        button.style.backgroundImage = `url('/public/textures/vinyl.jpg')`;
+      }
       button.style.backgroundSize = 'cover';
     } else {
       button.style.backgroundColor = item;
     }
-    button.onclick = () => changeFunction(isTexture ? item.path : item);
+
+    button.onclick = () => changeFunction(item);
     container.appendChild(button);
   });
 }
 
-// Change Colors
-function changeShoeColor(color) {
-  if (!model) return;
-  model.traverse((child) => {
-    if (child.isMesh && child.name.includes('outside')) {
-      child.material.color.set(color);
-      child.material.map = null; // Remove texture
-      child.material.needsUpdate = true;
-    }
-  });
-}
-
-function changeLaceColor(color) {
-  if (!model) return;
-  model.traverse((child) => {
-    if (child.isMesh && child.name.includes('laces')) {
-      child.material.color.set(color);
-      child.material.map = null;
-      child.material.needsUpdate = true;
-    }
-  });
-}
-
-function changeSoleColor(color) {
-  if (!model) return;
-  model.traverse((child) => {
-    if (child.isMesh && child.name.includes('sole')) {
-      child.material.color.set(color);
-      child.material.map = null;
-      child.material.needsUpdate = true;
-    }
-  });
-}
-
-// Apply Texture
-function applyTexture(texturePath) {
-  if (!model) return;
-  const texture = textureLoader.load(texturePath, () => {
-    console.log('Texture loaded:', texturePath);
-  }, undefined, (error) => {
-    console.error('Error loading texture:', error);
-  });
-  model.traverse((child) => {
-    if (child.isMesh && (child.name.includes('outside') || child.name.includes('laces') || child.name.includes('sole'))) {
-      child.material.map = texture;
-      child.material.color.set("black"); // Set to light gray to make texture more visible // Reset color to ensure texture is visible
-      child.material.needsUpdate = true;
-    }
-  });
-}
-
-// Reset Model
-function resetModel() {
-  changeShoeColor('white');
-  changeLaceColor('white');
-  changeSoleColor('white');
-}
-
-// Add Buttons to UI
+// UI Buttons
 createButtons('shoe-colors', colors, changeShoeColor);
 createButtons('lace-colors', colors, changeLaceColor);
 createButtons('sole-colors', colors, changeSoleColor);
-createButtons('texture-options', textures, applyTexture, true);
+createButtons('texture-options', Object.values(textures), changeTexture, true);
+
+// Camera & Controls
+camera.position.set(0, 2, 8);
+const controls = new OrbitControls(camera, renderer.domElement);
+
+function resetModel() {
+  if (!model) {
+    console.error('Model not loaded yet.');
+    return;
+  }
+
+  changeShoeColor('white');
+  changeLaceColor('white');
+  changeSoleColor('white');
+
+  model.traverse((child) => {
+    if (child.isMesh) {
+      child.material.map = null;
+      child.material.needsUpdate = true;
+    }
+  });
+
+  document.getElementById('current-shoe-color').style.backgroundColor = 'white';
+  document.getElementById('current-lace-color').style.backgroundColor = 'white';
+  document.getElementById('current-sole-color').style.backgroundColor = 'white';
+
+  const currentTextureDisplay = document.getElementById('current-texture-display');
+  if (currentTextureDisplay) {
+    currentTextureDisplay.style.backgroundImage = 'none';
+  }
+
+  console.log('Model has been reset to default values.');
+}
 
 const resetButton = document.getElementById('reset-button');
 if (resetButton) {
@@ -215,27 +263,59 @@ if (resetButton) {
   console.error('Reset button not found.');
 }
 
-// Tab functionality
-const tabs = document.querySelectorAll('.tab-button');
-const contents = document.querySelectorAll('.tab-content');
+// Modal Functionality
+const orderButton = document.getElementById('order-button');
+const orderModal = document.getElementById('order-modal');
+const closeModal = document.getElementById('close-modal');
+const orderForm = document.getElementById('order-form');
 
-tabs.forEach((tab) => {
-  tab.addEventListener('click', () => {
-    tabs.forEach((t) => t.classList.remove('active'));
-    tab.classList.add('active');
-
-    contents.forEach((content) => {
-      content.classList.remove('active');
-      if (content.id === tab.dataset.tab) {
-        content.classList.add('active');
-      }
-    });
-  });
+// Show modal
+orderButton.addEventListener('click', () => {
+  orderModal.classList.remove('hidden');
 });
 
-// Camera & Controls
-camera.position.set(0, 2, 8);
-const controls = new OrbitControls(camera, renderer.domElement);
+// Close modal
+closeModal.addEventListener('click', () => {
+  orderModal.classList.add('hidden');
+});
+
+// Submit order
+orderForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const formData = new FormData(orderForm);
+  const orderData = {
+    customerName: formData.get('name'),
+    email: formData.get('email'),
+    address: formData.get('address'),
+    size: formData.get('size'),
+    configuration: {
+      shoeColor: document.getElementById('current-shoe-color').style.backgroundColor,
+      laceColor: document.getElementById('current-lace-color').style.backgroundColor,
+      soleColor: document.getElementById('current-sole-color').style.backgroundColor,
+    },
+  };
+
+  try {
+    const response = await fetch('http://localhost:3000/api/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(orderData),
+    });
+
+    if (response.ok) {
+      alert('Bestelling geplaatst!');
+      orderModal.classList.add('hidden');
+    } else {
+      alert('Fout bij het plaatsen van de bestelling.');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Er is een onverwachte fout opgetreden.');
+  }
+});
 
 // Resize
 window.addEventListener('resize', () => {
