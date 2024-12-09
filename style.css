@@ -248,14 +248,14 @@ input, select {
 }
 
 input:focus, select:focus {
-  border-color: #007bff;
+  border-color: #128800;
   outline: none;
 }
 
 .submit-button {
   width: 100%;
   padding: 10px 20px;
-  background-color: #007bff;
+  background-color: #128800;
   color: #fff;
   border: none;
   border-radius: 5px;
@@ -265,14 +265,14 @@ input:focus, select:focus {
 }
 
 .submit-button:hover {
-  background-color: #0056b3;
+  background-color: #128800;
 }
 
 .close-button {
   margin-top: 10px;
   background: transparent;
   border: none;
-  color: #007bff;
+  color: #128800;
   font-size: 0.9rem;
   cursor: pointer;
 }
