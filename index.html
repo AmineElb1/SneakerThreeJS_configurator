@@ -67,45 +67,46 @@
       <button id="order-button">Order</button>
 
       <div id="order-modal" class="modal hidden">
-  <div class="modal-content">
-    <h2>Plaats je bestelling</h2>
-    <form id="order-form">
-      <div class="form-group">
-        <label for="name">Naam:</label>
-        <input type="text" id="name" name="name" placeholder="Jouw naam" required />
+        <div class="modal-content">
+          <h2>Plaats je bestelling</h2>
+          <form id="order-form">
+            <div class="form-group">
+              <label for="name">Naam:</label>
+              <input type="text" id="name" name="name" placeholder="Jouw naam" required />
+            </div>
+      
+            <div class="form-group">
+              <label for="email">E-mailadres:</label>
+              <input type="email" id="email" name="email" placeholder="Jouw e-mailadres" required />
+            </div>
+      
+            <div class="form-group">
+              <label for="address">Adres:</label>
+              <input type="text" id="address" name="address" placeholder="Jouw adres" required />
+            </div>
+      
+            <div class="form-group">
+              <label for="size">Maat:</label>
+              <select id="size" name="size" required>
+                <option value="" disabled selected>Kies een maat</option>
+                <option value="36">36</option>
+                <option value="37">37</option>
+                <option value="38">38</option>
+                <option value="39">39</option>
+                <option value="40">40</option>
+                <option value="41">41</option>
+                <option value="42">42</option>
+                <option value="43">43</option>
+                <option value="44">44</option>
+              </select>
+            </div>
+      
+            <button type="submit" class="submit-button">Bestellen</button>
+          </form>
+          <button id="close-modal" class="close-button">Sluiten</button>
+        </div>
       </div>
-
-      <div class="form-group">
-        <label for="email">E-mailadres:</label>
-        <input type="email" id="email" name="email" placeholder="Jouw e-mailadres" required />
-      </div>
-
-      <div class="form-group">
-        <label for="address">Adres:</label>
-        <input type="text" id="address" name="address" placeholder="Jouw adres" required />
-      </div>
-
-      <div class="form-group">
-        <label for="size">Maat:</label>
-        <select id="size" name="size" required>
-          <option value="" disabled selected>Kies een maat</option>
-          <option value="36">36</option>
-          <option value="37">37</option>
-          <option value="38">38</option>
-          <option value="39">39</option>
-          <option value="40">40</option>
-          <option value="41">41</option>
-          <option value="42">42</option>
-          <option value="43">43</option>
-          <option value="44">44</option>
-        </select>
-      </div>
-
-      <button type="submit" class="submit-button">Bestellen</button>
-    </form>
-    <button id="close-modal" class="close-button">Sluiten</button>
-  </div>
-</div>
+      
 
 
     
